@@ -38,11 +38,25 @@ Generating AI content is asynchronous and prone to safety blocks. Our UX address
 
 ## 4. AI Service Implementation
 
-The `AICoreService` is a robust facade for the `@google/genai` SDK:
+The `AICoreService` is a robust facade for the `@google/genai` SDK, designed for resilience, observability, and performance.
 
 - **Stateless Client Initialization**: Fresh `GoogleGenAI` instances are created per-call to ensure dynamic environment keys (from `process.env.API_KEY`) are respected without stale closures.
-- **Token Budget Coordination**: Automatically manages `thinkingBudget` and `maxOutputTokens` to prevent truncated or empty responses during deep reasoning.
-- **Resilient Retry Logic**: Implements exponential backoff with jitter for transient 429/503 errors.
+
+- **Comprehensive Error Handling**: The service intercepts and sanitizes Gemini API errors, mapping them to actionable diagnostics for the user. It distinguishes between:
+    - **Safety Errors**: Content policy violations.
+    - **Authentication Errors**: Invalid API keys or billing issues.
+    - **Rate Limit Errors**: Exceeded request quotas.
+    - **General API Errors**: Server-side issues (e.g., 500, 503).
+
+- **Resilient Retry Logic**: Implements exponential backoff with jitter for transient errors (like 429, 503), improving reliability without overwhelming the API. Retries are skipped for non-transient errors like authentication or safety issues.
+
+- **Token Budget Coordination**: Automatically manages `thinkingBudget` and `maxOutputTokens` to prevent truncated or empty responses, especially for deep reasoning tasks.
+
+- **Performance Optimization**:
+    - **Model Selection**: Chooses the most appropriate model based on the task (e.g., `gemini-2.5-flash-image` for speed, `gemini-3-pro-image-preview` for quality).
+    - **Request Debouncing & Cancellation**: Utilizes debouncing and `AbortController` to prevent redundant API calls during rapid UI interactions.
+
+- **Cost Management**: Implements request queuing and caching for identical requests to optimize token consumption and reduce operational costs.
 
 ## 5. Security & Privacy
 

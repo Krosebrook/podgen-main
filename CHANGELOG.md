@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation: Enhanced code documentation and JSDoc comments
 - Documentation: Updated README.md with testing commands
 - Documentation: Updated CONTRIBUTING.md with comprehensive testing guidelines
+- Documentation: Detailed testing guide in /tests/README.md
 
 ### Changed
 - Refactored codebase to use centralized logger instead of direct console calls
